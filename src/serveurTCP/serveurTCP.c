@@ -19,14 +19,23 @@ static void * server_TCP ( serverTcpParams_t * arg );
 
 int launch_Server ( serverTcpParams_t* arg )
 {
-	arg->errorLine = 0;
+	arg->errorLine = 0; //no error 
+
+	//Un thread est initialisé avec comme fonction de le serveurTCP et en paramètre les paramètres qu'il doit utiliser
   	if ( pthread_create ( &arg->threadServerTCP, NULL, (void * (*)(void *))server_TCP, arg ) == -1 )
   	{
+
+  		//En cas d'erreur, un message est affiché, un bit d'actitivé du serveur indique qu'il n'est pas fonctionnel et la ligne fautive est renvoyée.
    		perror ( "pthread_create" );
    		arg->flag.work = false;
 		return ( __LINE__ );
   	}
+
+  	//Si le lancement se passe normalement, le bit d'activité du serveur indique que celui-ci est en fonctionnement.
 	arg->flag.work = true;
+
+
+	//Return 0 => Pas d'erreur.
   	return ( 0 );
 }
 
@@ -56,7 +65,6 @@ void * server_TCP ( serverTcpParams_t * arg )
 		return ( (void *)&arg->errorLine );
 	}
 
-	//set master socket to allow multiple connections , this is just a good habit, it will work without this
 	if ( setsockopt ( master_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt) ) < 0 )
 	{
 		perror("setsockopt");
@@ -78,16 +86,15 @@ void * server_TCP ( serverTcpParams_t * arg )
    		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
-	//printf("Listener on port %d \n", PORT);
-	//try to specify maximum of 10 pending connections for the master socket
-	if (listen(master_socket, 10) < 0)
+	
+	if (listen(master_socket, arg->nbMaxClients) < 0)
 	{
 		perror("listen");
    		arg->flag.work = false;
    		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
-	//mtp_init_client_tcp((agent*)ag,"127.0.0.1");
+	
 	while ( true ) 
 	{
 		//clear the socket set
@@ -198,107 +205,10 @@ void * server_TCP ( serverTcpParams_t * arg )
 						free ( buffer );
 						buffer = calloc ( 1025, sizeof( char ) );
 						buffer[ 0 ]= '\0';
-					}				   
-					//usleep(100000);
-					//set the string terminating NULL byte on the end of the data read
-								  
+					}
 				}
 			}
 		}
-	}	 
+	}
 }
 
-
-char** str_split(char* a_str, const char a_delim, int* nbItem)
-{
-  char** result    = 0;
-  size_t count     = 0;
-  char* tmp        = a_str;
-  char* last_comma = 0;
-  char delim[2];
-  delim[0] = a_delim;
-  delim[1] = 0;
-
-    /* Count how many elements will be extracted. */
-  while (*tmp)
-  {
-    if (a_delim == *tmp)
-    {
-      count++;
-      last_comma = tmp;
-    }
-    tmp++;
-  }
-
-    /* Add space for trailing token. */
-  count += last_comma < (a_str + strlen(a_str) - 1);
-
-    /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
-  count++;
-
-  result = malloc(sizeof(char*) * count);
-
-  if (result)
-  {
-    size_t idx  = 0;
-    char* token = strtok(a_str, delim);
-
-    while (token)
-    {
-      assert(idx < count);
-      *(result + idx++) = strdup(token);
-      token = strtok(0, delim);
-    }
-    assert(idx == count - 1);
-    *(result + idx) = 0;
-  }
-  *nbItem = count-1;
-  return result;
-}
-
-int findSubstring(char* input, char* toFind, char*** result)
-{
-  char** toReturn;
-  toReturn = malloc(sizeof(char*));
-  int nbMessage = 0;
-  int isOk = 1;
-
-  while(isOk==1 && input!=NULL)
-  {
-    if(strlen(input)>strlen(toFind)+1)
-    {
-      for(int i=strlen(input)-1-strlen(toFind);i>=0;i--)
-      {
-        isOk=1;
-        for(int j=0;j<strlen(toFind);j++)
-        {
-          if(input[i+j]!=toFind[j])
-          {
-            isOk = 0;
-            break;
-          }        
-        }
-        if(isOk==1)
-        {
-          toReturn[nbMessage] = input + i + strlen(toFind);
-          (*result)[nbMessage] = malloc(500);
-          memcpy((*result)[nbMessage],toReturn[nbMessage],strlen(toReturn[nbMessage]));
-          (*result)[nbMessage][ strlen ( toReturn[nbMessage] ) ] = '\0';
-          if(i > 0)
-          {
-            //memcpy(input, input, strlen(input)-(strlen(input)-i-1));
-            input[i] = '\0';
-          }else
-          {
-            input = NULL;
-          }
-          
-          break;
-        }
-      }
-    }
-    nbMessage++;
-  }
-  return nbMessage;
-}
