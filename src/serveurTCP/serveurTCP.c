@@ -12,7 +12,6 @@
 #include <stdbool.h>
 
 #include "serveurTCP.h"
-#include "../log/log.h"
 
 
 static void * server_TCP ( serverTcpParams_t * arg );
@@ -158,7 +157,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 				if( client_socket[ i ] == 0 )
 				{
 					client_socket[ i ] = new_socket;
-					logDebug ( "Adding to list of sockets as %d\n" , i );
+					printf ( "Adding to list of sockets as %d\n" , i );
 					break;
 				}
 			}
