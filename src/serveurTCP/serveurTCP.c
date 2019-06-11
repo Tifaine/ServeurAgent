@@ -192,14 +192,18 @@ void * server_TCP ( serverTcpParams_t * arg )
 						// contains
 						char** delimiters;
 						int nbElement;
+						printf("Recu : %s\n",result[id]);
+						delimiters = str_split ( result[id], '|', &nbElement );
 
-						delimiters = str_split ( result[id], '-', &nbElement );
-						
-						for(int indice = 0;indice < nbElement ; indice++)
+						if(nbElement == 5)
 						{
-							printf("Message : %s \n",delimiters[indice]);
+							if(atoi(delimiters[2]) == INIT)
+							{
+								//Initialisation d'un nouvel objet, création d'un socket pour pouvoir lui parler.
+								PS_TCP_ajoutSubscriber(delimiters[1], sd);
+							}
 						}
-						
+						send ( sd , "01ABBob" , strlen ( "01ABBob" ), MSG_CONFIRM );
 						free ( result[ id ] );
 						free ( buffer );
 						buffer = calloc ( 1025, sizeof( char ) );

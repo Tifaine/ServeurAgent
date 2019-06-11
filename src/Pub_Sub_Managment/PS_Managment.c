@@ -45,7 +45,6 @@ void PS_TCP_suppimerSubscriber(int socket)
 			{
 				for(int k=j;k<listTopics[i].nbSubscriber-1;k++)
 				{
-					
 					listTopics[i].tabSocket[k]=listTopics[i].tabSocket[k+1];
 				}
 				listTopics[i].nbSubscriber--;

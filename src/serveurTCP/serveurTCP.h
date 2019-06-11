@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "../util/util.h"
 
+#define INIT 1
 /**
  * \struct serverTcpParams_t
  * \brief Objet regroupant les paramètres d'un serveur.
