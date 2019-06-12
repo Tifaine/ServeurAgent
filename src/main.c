@@ -25,7 +25,6 @@ int main ( int argc, char ** argv )
 	}
 	// END_FREEONEXIT
 
-	printf("Hello world\n");
 	launch_Server ( &serverParams );
 
 	while(1){};

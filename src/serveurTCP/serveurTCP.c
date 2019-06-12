@@ -13,11 +13,14 @@
 
 #include "serveurTCP.h"
 
+#define NB_ELEMENT_MESSAGE_INIT	5
 
 static void * server_TCP ( serverTcpParams_t * arg );
 
 int launch_Server ( serverTcpParams_t* arg )
 {
+	initRegistration();
+	PS_TCP_init(); //Init pub-sub managment
 	arg->errorLine = 0; //no error 
 
 	//Un thread est initialisé avec comme fonction de le serveurTCP et en paramètre les paramètres qu'il doit utiliser
@@ -145,10 +148,10 @@ void * server_TCP ( serverTcpParams_t * arg )
 			}
 		 
 			//inform user of socket number - used in send and receive commands
-			printf ( "New connection , socket fd is %d , ip is : %s , port : %d \n",
-				new_socket,
-				inet_ntoa ( address.sin_addr ),
-				ntohs ( address.sin_port ) );
+			//printf ( "New connection , socket fd is %d , ip is : %s , port : %d \n",
+			//	new_socket,
+			//	inet_ntoa ( address.sin_addr ),
+			//	ntohs ( address.sin_port ) );
 			 
 			//add new socket to array of sockets
 			for ( uint8_t i = 0; i < max_clients; i++) 
@@ -157,7 +160,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 				if( client_socket[ i ] == 0 )
 				{
 					client_socket[ i ] = new_socket;
-					printf ( "Adding to list of sockets as %d\n" , i );
+					//printf ( "Adding to list of sockets as %d\n" , i );
 					break;
 				}
 			}
@@ -192,18 +195,27 @@ void * server_TCP ( serverTcpParams_t * arg )
 						// contains
 						char** delimiters;
 						int nbElement;
-						printf("Recu : %s\n",result[id]);
 						delimiters = str_split ( result[id], '|', &nbElement );
 
-						if(nbElement == 5)
+						if(nbElement == NB_ELEMENT_MESSAGE_INIT)
 						{
 							if(atoi(delimiters[2]) == INIT)
 							{
 								//Initialisation d'un nouvel objet, création d'un socket pour pouvoir lui parler.
-								PS_TCP_ajoutSubscriber(delimiters[1], sd);
+								char* nomUnique;
+								nomUnique = malloc(strlen(delimiters[1])+1+sizeof(int));
+								sprintf(nomUnique,"%s_%d",delimiters[1],sd);
+								PS_TCP_ajoutSubscriber(nomUnique, sd);
+
+								char* toSend;
+								toSend = gestionNouvelArrivant(nomUnique,delimiters[4],sd);
+								send(sd,toSend,strlen(toSend),MSG_CONFIRM);
+
+								free(toSend);
+								free(nomUnique);
 							}
 						}
-						send ( sd , "01ABBob" , strlen ( "01ABBob" ), MSG_CONFIRM );
+						
 						free ( result[ id ] );
 						free ( buffer );
 						buffer = calloc ( 1025, sizeof( char ) );

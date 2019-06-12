@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include "../util/util.h"
-
+#include "../gestionObjet/registration.h"
 #define INIT 1
 /**
  * \struct serverTcpParams_t
