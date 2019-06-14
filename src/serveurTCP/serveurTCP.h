@@ -21,7 +21,10 @@
 #include <stdint.h>
 #include "../util/util.h"
 #include "../gestionObjet/registration.h"
-#define INIT 1
+
+#define INIT 	1
+#define MESSAGE 2
+
 /**
  * \struct serverTcpParams_t
  * \brief Objet regroupant les paramètres d'un serveur.

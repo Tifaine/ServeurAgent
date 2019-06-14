@@ -10,10 +10,11 @@
 #include <sys/socket.h>
 #include <unistd.h>   //close
 #include <stdbool.h>
-
+#include "../Pub_Sub_Managment/PS_Managment.h"
 #include "serveurTCP.h"
 
-#define NB_ELEMENT_MESSAGE_INIT	5
+#define NB_ELEMENT_MESSAGE_INIT			5
+#define NB_ELEMENT_MESSAGE_TO_TRANSMIT 	6
 
 static void * server_TCP ( serverTcpParams_t * arg );
 
@@ -24,21 +25,21 @@ int launch_Server ( serverTcpParams_t* arg )
 	arg->errorLine = 0; //no error 
 
 	//Un thread est initialisé avec comme fonction de le serveurTCP et en paramètre les paramètres qu'il doit utiliser
-  	if ( pthread_create ( &arg->threadServerTCP, NULL, (void * (*)(void *))server_TCP, arg ) == -1 )
-  	{
+	if ( pthread_create ( &arg->threadServerTCP, NULL, (void * (*)(void *))server_TCP, arg ) == -1 )
+	{
 
   		//En cas d'erreur, un message est affiché, un bit d'actitivé du serveur indique qu'il n'est pas fonctionnel et la ligne fautive est renvoyée.
-   		perror ( "pthread_create" );
-   		arg->flag.work = false;
+		perror ( "pthread_create" );
+		arg->flag.work = false;
 		return ( __LINE__ );
-  	}
+	}
 
   	//Si le lancement se passe normalement, le bit d'activité du serveur indique que celui-ci est en fonctionnement.
 	arg->flag.work = true;
 
 
 	//Return 0 => Pas d'erreur.
-  	return ( 0 );
+	return ( 0 );
 }
 
 void * server_TCP ( serverTcpParams_t * arg )
@@ -62,19 +63,19 @@ void * server_TCP ( serverTcpParams_t * arg )
 	if ( !master_socket ) 
 	{
 		perror ( "socket failed" );
-   		arg->flag.work = false;
-   		arg->errorLine = __LINE__;
+		arg->flag.work = false;
+		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
 
 	if ( setsockopt ( master_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt) ) < 0 )
 	{
 		perror("setsockopt");
-   		arg->flag.work = false;
-   		arg->errorLine = __LINE__;
+		arg->flag.work = false;
+		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
- 
+
 	//type of socket created
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
@@ -84,16 +85,16 @@ void * server_TCP ( serverTcpParams_t * arg )
 	if ( bind ( master_socket, (struct sockaddr *)&address, sizeof ( address ) ) < 0) 
 	{
 		perror("bind failed");
-   		arg->flag.work = false;
-   		arg->errorLine = __LINE__;
+		arg->flag.work = false;
+		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
 	
 	if (listen(master_socket, arg->nbMaxClients) < 0)
 	{
 		perror("listen");
-   		arg->flag.work = false;
-   		arg->errorLine = __LINE__;
+		arg->flag.work = false;
+		arg->errorLine = __LINE__;
 		return ( (void *)&arg->errorLine );
 	}
 	
@@ -101,7 +102,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 	{
 		//clear the socket set
 		FD_ZERO ( &readfds );
- 
+
 		//add master socket to set
 		FD_SET ( master_socket, &readfds );
 		max_sd = master_socket;
@@ -124,7 +125,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 				max_sd = sd;
 			}
 		}
- 
+
 		//wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
 		activity = select ( max_sd + 1 , &readfds , NULL , NULL , NULL );
 
@@ -133,7 +134,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 		{
 			printf("select error");
 		}
-		 
+
 		// If something happened on the master socket , then its an incoming connection
 		if ( FD_ISSET ( master_socket, &readfds ) ) 
 		{
@@ -142,17 +143,17 @@ void * server_TCP ( serverTcpParams_t * arg )
 			if ( new_socket < 0 )
 			{
 				perror("accept");
-   				arg->flag.work = false;
-		   		arg->errorLine = __LINE__;
+				arg->flag.work = false;
+				arg->errorLine = __LINE__;
 				return ( (void *)&arg->errorLine );
 			}
-		 
+
 			//inform user of socket number - used in send and receive commands
 			//printf ( "New connection , socket fd is %d , ip is : %s , port : %d \n",
 			//	new_socket,
 			//	inet_ntoa ( address.sin_addr ),
 			//	ntohs ( address.sin_port ) );
-			 
+
 			//add new socket to array of sockets
 			for ( uint8_t i = 0; i < max_clients; i++) 
 			{
@@ -165,12 +166,12 @@ void * server_TCP ( serverTcpParams_t * arg )
 				}
 			}
 		}
-		 
+
 		// else its some IO operation on some other socket :)
 		for ( uint8_t i = 0; i < max_clients; i++) 
 		{
 			sd = client_socket[ i ];
-			 
+
 			if ( FD_ISSET ( sd , &readfds ) ) 
 			{
 				//Check if it was for closing , and also read the incoming message
@@ -178,7 +179,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 				if ( valread == 0 )
 				{ //Somebody disconnected 
 					getpeername ( sd , (struct sockaddr*)&address, (socklen_t*)&addrlen );
-										
+					PS_TCP_suppimerSubscriber(sd);
 					//Close the socket and mark as 0 in list for reuse
 					close( sd );
 					client_socket[ i ] = 0;
@@ -188,9 +189,11 @@ void * server_TCP ( serverTcpParams_t * arg )
 					send ( sd , "01ABsuccess" , strlen ( "01ABsuccess" ), MSG_CONFIRM );
 					char** result;
 					result = malloc(sizeof(char*)); 
+					printf("Recu0 %s\n",buffer);
 					int nbMess = findSubstring ( buffer, "01AB", &result );
 					for ( int id = nbMess-1; id >= 0; id-- )
 					{
+						printf("Recu : %s\n",result[id]);
 						result[ id ][ valread ] = '\0';
 						// contains
 						char** delimiters;
@@ -214,7 +217,15 @@ void * server_TCP ( serverTcpParams_t * arg )
 								free(toSend);
 								free(nomUnique);
 							}
+						}else if(nbElement == NB_ELEMENT_MESSAGE_TO_TRANSMIT)
+						{
+							if(atoi(delimiters[2]) == MESSAGE)
+							{
+								PS_TCP_publish(delimiters[4], delimiters[5]);
+							}
 						}
+
+
 						
 						free ( result[ id ] );
 						free ( buffer );
