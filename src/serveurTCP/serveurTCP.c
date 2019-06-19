@@ -189,11 +189,9 @@ void * server_TCP ( serverTcpParams_t * arg )
 					send ( sd , "01ABsuccess" , strlen ( "01ABsuccess" ), MSG_CONFIRM );
 					char** result;
 					result = malloc(sizeof(char*)); 
-					printf("Recu0 %s\n",buffer);
 					int nbMess = findSubstring ( buffer, "01AB", &result );
 					for ( int id = nbMess-1; id >= 0; id-- )
 					{
-						printf("Recu : %s\n",result[id]);
 						result[ id ][ valread ] = '\0';
 						// contains
 						char** delimiters;
