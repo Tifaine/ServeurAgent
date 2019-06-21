@@ -221,15 +221,13 @@ void * server_TCP ( serverTcpParams_t * arg )
 							{
 								PS_TCP_publish(delimiters[4], delimiters[5]);
 							}
-						}
-
-
-						
+						}						
 						free ( result[ id ] );
 						free ( buffer );
 						buffer = calloc ( 1025, sizeof( char ) );
 						buffer[ 0 ]= '\0';
 					}
+					free(result);
 				}
 			}
 		}
