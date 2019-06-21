@@ -187,6 +187,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 				else
 				{ 
 					send ( sd , "01ABsuccess" , strlen ( "01ABsuccess" ), MSG_CONFIRM );
+
 					char** result;
 					result = malloc(sizeof(char*)); 
 					int nbMess = findSubstring ( buffer, "01AB", &result );
@@ -221,8 +222,9 @@ void * server_TCP ( serverTcpParams_t * arg )
 							{
 								PS_TCP_publish(delimiters[4], delimiters[5]);
 							}
-						}						
-						free ( result[ id ] );
+						}
+						//free ( result[ id ] );
+						//TODO Ox, au boulot ! <3
 						free ( buffer );
 						buffer = calloc ( 1025, sizeof( char ) );
 						buffer[ 0 ]= '\0';
