@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "../Pub_Sub_Managment/PS_Managment.h"
 #include "serveurTCP.h"
-
+#include "../log/log.h"
 #define NB_ELEMENT_MESSAGE_INIT			5
 #define NB_ELEMENT_MESSAGE_TO_TRANSMIT 	6
 
@@ -20,7 +20,10 @@ static void * server_TCP ( serverTcpParams_t * arg );
 
 int launch_Server ( serverTcpParams_t* arg )
 {
+	logDebug("\n");
+	logVerbose("\n");
 	initRegistration();
+	logDebug("\n");
 	PS_TCP_init(); //Init pub-sub managment
 	arg->errorLine = 0; //no error 
 
@@ -170,12 +173,14 @@ void * server_TCP ( serverTcpParams_t * arg )
 		// else its some IO operation on some other socket :)
 		for ( uint8_t i = 0; i < max_clients; i++) 
 		{
+
 			sd = client_socket[ i ];
 
 			if ( FD_ISSET ( sd , &readfds ) ) 
 			{
 				//Check if it was for closing , and also read the incoming message
 				valread = read ( sd, buffer, 1024 );
+				logDebug("\n");
 				if ( valread == 0 )
 				{ //Somebody disconnected 
 					getpeername ( sd , (struct sockaddr*)&address, (socklen_t*)&addrlen );
@@ -187,12 +192,13 @@ void * server_TCP ( serverTcpParams_t * arg )
 				else
 				{ 
 					send ( sd , "01ABsuccess" , strlen ( "01ABsuccess" ), MSG_CONFIRM );
-
+					logDebug("\n");
 					char** result;
 					result = malloc(sizeof(char*)); 
 					int nbMess = findSubstring ( buffer, "01AB", &result );
 					for ( int id = nbMess-1; id >= 0; id-- )
 					{
+						logDebug("\n");
 						result[ id ][ valread ] = '\0';
 						// contains
 						char** delimiters;
@@ -220,14 +226,19 @@ void * server_TCP ( serverTcpParams_t * arg )
 						{
 							if(atoi(delimiters[2]) == MESSAGE)
 							{
+								logDebug("\n");
 								PS_TCP_publish(delimiters[4], delimiters[5]);
+								logDebug("\n");
 							}
 						}
 						//free ( result[ id ] );
 						//TODO Ox, au boulot ! <3
 						free ( buffer );
+						logDebug("\n");
 						buffer = calloc ( 1025, sizeof( char ) );
+						logDebug("\n");
 						buffer[ 0 ]= '\0';
+						logDebug("\n");
 					}
 					free(result);
 				}
