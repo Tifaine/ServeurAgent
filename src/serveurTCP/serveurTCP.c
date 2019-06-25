@@ -20,10 +20,8 @@ static void * server_TCP ( serverTcpParams_t * arg );
 
 int launch_Server ( serverTcpParams_t* arg )
 {
-	logDebug("\n");
 	logVerbose("\n");
 	initRegistration();
-	logDebug("\n");
 	PS_TCP_init(); //Init pub-sub managment
 	arg->errorLine = 0; //no error 
 
@@ -180,7 +178,6 @@ void * server_TCP ( serverTcpParams_t * arg )
 			{
 				//Check if it was for closing , and also read the incoming message
 				valread = read ( sd, buffer, 1024 );
-				logDebug("\n");
 				if ( valread == 0 )
 				{ //Somebody disconnected 
 					getpeername ( sd , (struct sockaddr*)&address, (socklen_t*)&addrlen );
@@ -190,21 +187,18 @@ void * server_TCP ( serverTcpParams_t * arg )
 					client_socket[ i ] = 0;
 				}
 				else
-				{ 
-					send ( sd , "01ABsuccess" , strlen ( "01ABsuccess" ), MSG_CONFIRM );
-					logDebug("\n");
+				{					
 					char** result;
 					result = malloc(sizeof(char*)); 
 					int nbMess = findSubstring ( buffer, "01AB", &result );
 					for ( int id = nbMess-1; id >= 0; id-- )
 					{
-						logDebug("\n");
 						result[ id ][ valread ] = '\0';
 						// contains
 						char** delimiters;
 						int nbElement;
 						delimiters = str_split ( result[id], '|', &nbElement );
-
+						
 						if(nbElement == NB_ELEMENT_MESSAGE_INIT)
 						{
 							if(atoi(delimiters[2]) == INIT)
@@ -218,7 +212,6 @@ void * server_TCP ( serverTcpParams_t * arg )
 								char* toSend;
 								toSend = gestionNouvelArrivant(nomUnique,delimiters[4],sd);
 								send(sd,toSend,strlen(toSend),MSG_CONFIRM);
-
 								free(toSend);
 								free(nomUnique);
 							}
@@ -226,19 +219,19 @@ void * server_TCP ( serverTcpParams_t * arg )
 						{
 							if(atoi(delimiters[2]) == MESSAGE)
 							{
-								logDebug("\n");
 								PS_TCP_publish(delimiters[4], delimiters[5]);
-								logDebug("\n");
 							}
 						}
+						for(int i=0;i<nbElement;i++)
+						{
+							free(delimiters[i]);
+						}
+						free(delimiters);
 						//free ( result[ id ] );
 						//TODO Ox, au boulot ! <3
 						free ( buffer );
-						logDebug("\n");
 						buffer = calloc ( 1025, sizeof( char ) );
-						logDebug("\n");
 						buffer[ 0 ]= '\0';
-						logDebug("\n");
 					}
 					free(result);
 				}

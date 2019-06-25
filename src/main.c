@@ -66,6 +66,12 @@ int main ( int argc, char ** argv )
 	// END_FREEONEXIT
 	
 	// INIT_CONFIG
+	flags.help = 0;
+	if( readParamArgs ( argc, argv, param ) )
+	{ // failure case
+	}
+
+
 	if ( flags.help )
 	{// configFile read successfully
 		helpParamArgs ( param );
@@ -83,12 +89,12 @@ int main ( int argc, char ** argv )
 	logSetFileName ( logFileName );
 	#endif
 	// END_LOG
-
+	flags.debug = 1;
 	printf ( "main start mode: %s\n", (flags.debug)?"debug":(flags.verbose)?"verbose":"normal" );
 	printf ( "print: %s\n", (flags.file)?"file":"terminal" );
 	logVerbose ( "Verbose Activated\n" );
 	logDebug ( "Debug Activated\n" );
-	
+
 	launch_Server ( &serverParams );
 
 	while(1){};

@@ -14,30 +14,33 @@ void initRegistration()
 
 char* gestionNouvelArrivant(char* nom_Unique, char* type, int socket)
 {
-	char* messageToReturn;
-
-	switch(atoi(type))
+	if(nom_Unique!=NULL)
 	{
-		case TYPE_PF:
+		char* messageToReturn;
+		switch(atoi(type))
+		{
+			case TYPE_PF:
 			listPF.socket = socket;			
-			messageToReturn = malloc(strlen(nom_Unique));
-			listPF.nomUnique =  malloc(strlen(nom_Unique));
-			messageToReturn = malloc(strlen(nom_Unique)+4);
+			messageToReturn = malloc(strlen(nom_Unique)+1);
+			listPF.nomUnique =  malloc(strlen(nom_Unique)+1);
+			messageToReturn = malloc(strlen(nom_Unique)+5);
 			sprintf(messageToReturn,"01AB%s",nom_Unique);
 			strcpy(listPF.nomUnique,nom_Unique);
-		break;
-		case TYPE_OBJET:
+			break;
+			case TYPE_OBJET:
 			listObjet.nbObjet++;
 			listObjet.tabSocket = realloc(listObjet.tabSocket,listObjet.nbObjet*sizeof(int));
 			listObjet.tabSocket[listObjet.nbObjet-1]= socket;
 			if(listPF.socket != -1)
 			{
-				messageToReturn = malloc(strlen(nom_Unique)+5+strlen(listPF.nomUnique));
+				messageToReturn = malloc(strlen(nom_Unique)+6+strlen(listPF.nomUnique));
 				sprintf(messageToReturn,"01AB%s/%s",nom_Unique,listPF.nomUnique);
 			}			
-		break;
-		default:
-		break;
-	}
-	return messageToReturn;
+			break;
+			default:
+			break;
+		}
+		return messageToReturn;
+	}else return NULL;
+	
 }

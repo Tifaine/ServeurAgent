@@ -1,4 +1,5 @@
 #include "PS_Managment.h"
+#include "../log/log.h"
 
 map_topic* listTopics;
 int nbTopic;
@@ -71,11 +72,8 @@ void PS_TCP_publish(char* nomTopic, char* data)
 void PS_TCP_envoiMessage(char* message, char* topic, int type, int socket)
 {
 	char* messageToSend;
-	messageToSend = malloc(strlen("01AB")+strlen(message)+1+sizeof(int));
+	messageToSend = malloc(strlen("01AB")+strlen(message)+1+sizeof(int)+1);
 	sprintf(messageToSend,"01AB%d-%s",type,message);
-		
 	send(socket , messageToSend , strlen(messageToSend) , MSG_CONFIRM );
-	
-	
 	free(messageToSend);
 }
