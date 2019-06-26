@@ -21,7 +21,19 @@
 #include <stdint.h>
 #include "../util/util.h"
 #include "../gestionObjet/registration.h"
-
+#include <arpa/inet.h>	//close
+#include <assert.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>   //strlen
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>   //close
+#include <stdbool.h>
+#include "../Pub_Sub_Managment/PS_Managment.h"
 #define INIT 	1
 #define MESSAGE 2
 

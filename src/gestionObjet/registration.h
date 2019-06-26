@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>   //strlen
 #include <stdlib.h>
+#include "../Pub_Sub_Managment/PS_Managment.h"
 
 
 typedef struct list_objet
@@ -38,7 +39,7 @@ typedef struct list_PF
 }list_PF;
 
 void initRegistration();
-
+void gestionDepartObjet(char* nom_Unique);
 char* gestionNouvelArrivant(char* nom_Unique, char* type, int socket);
 
 #endif //REGISTRATION_H

@@ -1,16 +1,4 @@
-#include <arpa/inet.h>	//close
-#include <assert.h>
-#include <errno.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>   //strlen
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>   //close
-#include <stdbool.h>
-#include "../Pub_Sub_Managment/PS_Managment.h"
+
 #include "serveurTCP.h"
 #include "../log/log.h"
 #define NB_ELEMENT_MESSAGE_INIT			5
@@ -181,7 +169,8 @@ void * server_TCP ( serverTcpParams_t * arg )
 				if ( valread == 0 )
 				{ //Somebody disconnected 
 					getpeername ( sd , (struct sockaddr*)&address, (socklen_t*)&addrlen );
-					PS_TCP_suppimerSubscriber(sd);
+					
+					gestionDepartObjet(PS_TCP_suppimerSubscriber(sd));
 					//Close the socket and mark as 0 in list for reuse
 					close( sd );
 					client_socket[ i ] = 0;

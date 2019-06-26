@@ -12,7 +12,8 @@
 *
 */
 
-
+#ifndef PS_MANAGMENT_H
+#define PS_MANAGMENT_H
 #include <stdio.h>
 #include <string.h>   //strlen
 #include <stdlib.h>
@@ -55,7 +56,7 @@ void PS_TCP_ajoutSubscriber(char* nom, int socket);
  * \param socket : Numéro de la socket à supprimer
  * \brief Fonction permettant de supprimer une socket à tous les topics crées
 */
-void PS_TCP_suppimerSubscriber(int socket);
+char* PS_TCP_suppimerSubscriber(int socket);
 
 
 /*
@@ -77,3 +78,6 @@ void PS_TCP_publish(char* nomTopic, char* data);
 	puis on envoie
 */
 void PS_TCP_envoiMessage(char* message, char* topic, int type, int socket);
+
+
+#endif

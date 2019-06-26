@@ -35,15 +35,18 @@ void PS_TCP_ajoutSubscriber(char* nom, int socket)
 	}
 }
 
-void PS_TCP_suppimerSubscriber(int socket)
+char* PS_TCP_suppimerSubscriber(int socket)
 {
 	//Client vient de se déconnecter, faut tout lui enlever !
+	char* toReturn;
 	for(int i=0;i<nbTopic;i++)
 	{
 		for(int j=0;j<listTopics[i].nbSubscriber;j++)
 		{
 			if(listTopics[i].tabSocket[j]==socket)
 			{
+				toReturn = malloc(strlen(listTopics[i].nom)+1);
+				strcpy(toReturn,listTopics[i].nom);
 				for(int k=j;k<listTopics[i].nbSubscriber-1;k++)
 				{
 					listTopics[i].tabSocket[k]=listTopics[i].tabSocket[k+1];
@@ -53,6 +56,7 @@ void PS_TCP_suppimerSubscriber(int socket)
 			}
 		}
 	}
+	return toReturn;
 }
 
 void PS_TCP_publish(char* nomTopic, char* data)

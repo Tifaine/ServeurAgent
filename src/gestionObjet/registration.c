@@ -3,6 +3,8 @@
 list_objet listObjet;
 list_PF listPF;
 
+#define DEPART_OBJET	8
+
 void initRegistration()
 {
 	listObjet.nbObjet = 0;
@@ -10,6 +12,17 @@ void initRegistration()
 
 	listPF.socket = -1;
 	listPF.nomUnique = malloc(1);
+}
+
+void gestionDepartObjet(char* nom_Unique)
+{
+	if(nom_Unique!=NULL)
+	{
+		char* messageToReturn;
+		messageToReturn = malloc(strlen(nom_Unique)+2+sizeof(int));
+		sprintf(messageToReturn,"%d/%s",DEPART_OBJET,nom_Unique);
+		PS_TCP_publish(listPF.nomUnique, messageToReturn);
+	}
 }
 
 char* gestionNouvelArrivant(char* nom_Unique, char* type, int socket)
@@ -21,7 +34,6 @@ char* gestionNouvelArrivant(char* nom_Unique, char* type, int socket)
 		{
 			case TYPE_PF:
 			listPF.socket = socket;			
-			messageToReturn = malloc(strlen(nom_Unique)+1);
 			listPF.nomUnique =  malloc(strlen(nom_Unique)+1);
 			messageToReturn = malloc(strlen(nom_Unique)+5);
 			sprintf(messageToReturn,"01AB%s",nom_Unique);
