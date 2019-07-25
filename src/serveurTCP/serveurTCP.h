@@ -18,8 +18,10 @@
 #ifndef SERVEUR_TCP_H
 #define SERVEUR_TCP_H
 
+
 #include <stdint.h>
-#include "../util/util.h"
+#include "../util/vector.h"
+#include "../util/parserXML.h"
 #include "../gestionObjet/registration.h"
 #include <arpa/inet.h>	//close
 #include <assert.h>

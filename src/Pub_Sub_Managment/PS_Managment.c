@@ -1,5 +1,6 @@
 #include "PS_Managment.h"
 #include "../log/log.h"
+#define MAXDATASIZE 	5000
 
 map_topic* listTopics;
 int nbTopic;
@@ -75,9 +76,39 @@ void PS_TCP_publish(char* nomTopic, char* data)
 
 void PS_TCP_envoiMessage(char* message, char* topic, int type, int socket)
 {
+	
 	char* messageToSend;
-	messageToSend = malloc(strlen("01AB")+strlen(message)+1+sizeof(int)+1);
-	sprintf(messageToSend,"01AB%d-%s",type,message);
-	send(socket , messageToSend , strlen(messageToSend) , MSG_CONFIRM );
+	mxml_node_t *xml;
+	mxml_node_t *data;
+	xml = mxmlNewXML("1.0");
+	
+	data = mxmlNewElement(xml, "publish");
+    mxmlElementSetAttr(data,"topic",topic);
+    if(type == TOPIC)
+    {
+    	
+    	mxmlElementSetAttr(data,"type","2");
+    }else
+    {    	
+    	mxmlElementSetAttr(data,"type","1");
+   	}
+    
+   	mxml_node_t *tree = NULL;
+    tree = mxmlLoadString(NULL, message, MXML_OPAQUE_CALLBACK);
+    if(tree == NULL)
+	{
+		mxmlElementSetAttr(data,"frame",message);
+	}else
+	{
+		mxmlAdd(data,MXML_ADD_AFTER,MXML_ADD_TO_PARENT,tree);
+	}
+        
+   	
+   	messageToSend = malloc(MAXDATASIZE);
+    mxmlSaveString(xml , messageToSend, MAXDATASIZE, MXML_NO_CALLBACK);
+    
+    send(socket , messageToSend , strlen(messageToSend) , MSG_CONFIRM );
+
 	free(messageToSend);
+	
 }

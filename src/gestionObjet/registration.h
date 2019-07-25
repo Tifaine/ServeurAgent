@@ -24,7 +24,7 @@
 #include <string.h>   //strlen
 #include <stdlib.h>
 #include "../Pub_Sub_Managment/PS_Managment.h"
-
+#include "../mxml/mxml.h"
 
 typedef struct list_objet
 {
@@ -40,6 +40,6 @@ typedef struct list_PF
 
 void initRegistration();
 void gestionDepartObjet(char* nom_Unique);
-char* gestionNouvelArrivant(char* nom_Unique, char* type, int socket);
+int gestionNouvelArrivant(char* nom_Unique, char* type, int socket, char* messageToReturn);
 
 #endif //REGISTRATION_H

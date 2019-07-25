@@ -3,8 +3,11 @@
 #include "../log/log.h"
 #define NB_ELEMENT_MESSAGE_INIT			5
 #define NB_ELEMENT_MESSAGE_TO_TRANSMIT 	6
+#define MAXDATASIZE 	5000
+
 
 static void * server_TCP ( serverTcpParams_t * arg );
+
 
 int launch_Server ( serverTcpParams_t* arg )
 {
@@ -155,7 +158,8 @@ void * server_TCP ( serverTcpParams_t * arg )
 				}
 			}
 		}
-
+		vector listMessage;
+		vector_init(&listMessage);
 		// else its some IO operation on some other socket :)
 		for ( uint8_t i = 0; i < max_clients; i++) 
 		{
@@ -169,15 +173,39 @@ void * server_TCP ( serverTcpParams_t * arg )
 				if ( valread == 0 )
 				{ //Somebody disconnected 
 					getpeername ( sd , (struct sockaddr*)&address, (socklen_t*)&addrlen );
-					
 					gestionDepartObjet(PS_TCP_suppimerSubscriber(sd));
 					//Close the socket and mark as 0 in list for reuse
 					close( sd );
 					client_socket[ i ] = 0;
 				}
 				else
-				{					
-					char** result;
+				{
+					int nbMess = openMessage(&listMessage,buffer);
+					for(int id = 0; id < nbMess; id++)
+					{
+						_message* mess = vector_get(&listMessage,id);
+						if(mess->type == INIT)
+						{
+							char* nomUnique;
+							nomUnique = malloc(strlen(mess->emitterName)+1+sizeof(int));
+							sprintf(nomUnique,"%s_%d",mess->emitterName,sd);
+							PS_TCP_ajoutSubscriber(nomUnique, sd);
+							char* toSend;
+							toSend = malloc(MAXDATASIZE);
+							gestionNouvelArrivant(nomUnique,mess->content,sd, toSend);
+						
+							send(sd,toSend,strlen(toSend),MSG_CONFIRM);
+							free(nomUnique);
+						}else
+						{
+							PS_TCP_publish(mess->receiverName,mess->content);
+						}
+
+					}
+					free ( buffer );
+					buffer = calloc ( 1025, sizeof( char ) );
+					buffer[ 0 ]= '\0';
+					/*char** result;
 					result = malloc(sizeof(char*)); 
 					int nbMess = findSubstring ( buffer, "01AB", &result );
 					for ( int id = nbMess-1; id >= 0; id-- )
@@ -222,7 +250,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 						buffer = calloc ( 1025, sizeof( char ) );
 						buffer[ 0 ]= '\0';
 					}
-					free(result);
+					free(result);*/
 				}
 			}
 		}
