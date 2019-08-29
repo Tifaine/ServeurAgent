@@ -15,7 +15,6 @@
 
 int openMessage(vector * listMessage, char * message)
 {
-	printf("Message : %s\n",message);
 	int nbMessage = 0;
 	mxml_node_t *tree = NULL;
 	mxml_node_t *node = NULL;

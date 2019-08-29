@@ -205,52 +205,7 @@ void * server_TCP ( serverTcpParams_t * arg )
 					free ( buffer );
 					buffer = calloc ( 1025, sizeof( char ) );
 					buffer[ 0 ]= '\0';
-					/*char** result;
-					result = malloc(sizeof(char*)); 
-					int nbMess = findSubstring ( buffer, "01AB", &result );
-					for ( int id = nbMess-1; id >= 0; id-- )
-					{
-						result[ id ][ valread ] = '\0';
-						// contains
-						char** delimiters;
-						int nbElement;
-						delimiters = str_split ( result[id], '|', &nbElement );
-						
-						if(nbElement == NB_ELEMENT_MESSAGE_INIT)
-						{
-							if(atoi(delimiters[2]) == INIT)
-							{
-								//Initialisation d'un nouvel objet, création d'un socket pour pouvoir lui parler.
-								char* nomUnique;
-								nomUnique = malloc(strlen(delimiters[1])+1+sizeof(int));
-								sprintf(nomUnique,"%s_%d",delimiters[1],sd);
-								PS_TCP_ajoutSubscriber(nomUnique, sd);
-
-								char* toSend;
-								toSend = gestionNouvelArrivant(nomUnique,delimiters[4],sd);
-								send(sd,toSend,strlen(toSend),MSG_CONFIRM);
-								free(toSend);
-								free(nomUnique);
-							}
-						}else if(nbElement == NB_ELEMENT_MESSAGE_TO_TRANSMIT)
-						{
-							if(atoi(delimiters[2]) == MESSAGE)
-							{
-								PS_TCP_publish(delimiters[4], delimiters[5]);
-							}
-						}
-						for(int i=0;i<nbElement;i++)
-						{
-							free(delimiters[i]);
-						}
-						free(delimiters);
-						//free ( result[ id ] );
-						//TODO Ox, au boulot ! <3
-						free ( buffer );
-						buffer = calloc ( 1025, sizeof( char ) );
-						buffer[ 0 ]= '\0';
-					}
-					free(result);*/
+					
 				}
 			}
 		}
